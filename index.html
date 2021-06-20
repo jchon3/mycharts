@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>D3 charts</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/base.css">
+</head>
+<body>
+	<header id="header">
+        <h1>D3 Charts Practices</h1>
+	</header>
+        
+    <div id="wrap">
+        <div id="output">
+            <!-- <svg class="chart"></svg> -->
+        </div>
+    </div>
+
+    <footer id="footer"></footer>
+
+	<script src="js/lib/jquery-3.5.1.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="js/base.js"></script>
+
+    <script>
+        var data = [10, 50, 80];
+        var r = 300;
+
+        var color = d3.scaleOrdinal()
+            .range(["red","blue","orange"]);
+
+        var canvas = d3.select("#output").append("svg")
+            .attr("width", 600)
+            .attr("height", 600);
+
+        var group = canvas.append("g")
+            .attr("transform","translate(300,300)");
+
+        var arc = d3.arc()
+            .innerRadius(200)
+            .outerRadius(r);
+
+        var pie = d3.pie()
+            .value(function (d) { return d; });
+        
+        var arcs = group.selectAll(".arc")
+            .data(pie(data))
+            .enter()
+            .append("g")
+            .attr("class","arc");
+        
+        arcs.append("path")
+            .attr("d", arc)
+            .attr("fill", function (d) { return color(d.data); });
+
+        arcs.append("text")
+            .attr("transform", function(d) { return "translate("+ arc.centroid(d) + ")"; })
+            .attr("text-ancher", "middle")
+            .attr("font-size", "1.5em")
+            .text( function (d) { return d.data; } );
+    </script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>D3 charts</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/base.css">
+    <style>
+        body {
+            background-color: #F6F6FC;
+            font-family: sans-serif;
+        }
+        h1 {
+            margin-left: 1.5rem;
+            font-size: 1.25rem;
+            color: #110952;
+        }
+        .bar-chart {
+            width: 700px;
+            min-height: 450px;
+            margin: 60px auto 0 auto;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #D8D8E9;
+            padding: 20px;
+        }
+        text {
+            font-size: 0.65rem;
+            fill: #49456C;
+        }
+        .bar {
+            fill: #5D92F6;
+            FILL: url(#dots);
+        }
+        .bar.danger {
+            fill: #F06B5A;
+            fill: url(#lines);
+        }
+
+        .yTicks .domain, .yTicks .tick line {
+            opacity: 0;
+        }
+
+        .yTicks .tick text {
+            opacity: 0.75;
+        }
+    </style>
+</head>
+<body>
+	<header id="header">
+        <h1>D3 Charts Practices</h1>
+        <p>copied from https://codepen.io/fossheim/pen/NWbBmby?editors=0010</p>
+	</header>
+        
+    <div id="wrap">
+        <div class="bar-chart">
+            <h1>Daily visitors</h1>
+        </div>
+
+        <svg width="0" height="0">
+            <defs>
+                <pattern id="dots" x="0" y="0" width="3" height="3" patternUnits="userSpaceOnUse">
+                    <rect fill="#5D92F6" x="0" y="0" width="3" height="3"></rect>
+                    <circle fill="#11419B" cx="1" cy="1" r="1"></circle>
+                </pattern>
+
+                <pattern id="lines" x="0" y="0" width="3" height="3" patternUnits="userSpaceOnUse">
+                    <rect fill="#F06B5A" x="0" y="0" width="3" height="3"></rect>
+                    <rect fill="#B91919" x="0" y="0" width="3" height="1"></rect>
+                </pattern>
+            </defs>
+        </svg>
+    </div>
+
+    <footer id="footer"></footer>
+
+	<script src="js/lib/jquery-3.5.1.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="js/base.js"></script>
+
+    <script>
+       const data = [
+           {day: "Mon", visitors: 100},
+           {day: "Tue", visitors: 174},
+           {day: "Wed", visitors: 92},
+           {day: "Thu", visitors: 193},
+           {day: "Fri", visitors: 103},
+           {day: "Sat", visitors: 104},
+           {day: "Sun", visitors: 294}
+       ];
+        const margin = {left: 50, right: 50, top: 100, bottom: 50};
+        const width = 700 - margin.left - margin.right;
+        const height = 450 - margin.top - margin.bottom;
+
+        const barChart = d3.select(".bar-chart").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom);
+
+        const x = d3.scaleLinear().rangeRound([0, width]);
+        const y = d3.scaleLinear().rangeRound([0, height]);
+
+        const maxYValue = d3.max(data, row => row.visitors) || 10;
+
+        x.domain([0, data.length]);
+        y.domain([maxYValue + 10, 0]);
+
+        const legend = barChart.append("g")
+            .attr("class", "legend")
+            .attr("aria-label", "Legend")
+            .attr("x", 0)
+            .attr("y", -margin.top);
+
+        legend.append("rect")
+            .attr("fill", "url(#dots)")
+            .attr("width", 13)
+            .attr("height", 13)
+            .attr("rx", 2)
+            .attr("x", margin.left / 2)
+            .attr("y", 10);
+        
+        legend.append("text")
+            .text("Over 100 daily visitors")
+            .attr("x", margin.left / 2 + 20)
+            .attr("y", 20);
+
+        legend.append("rect")
+            .attr("fill", "url(#lines)")
+            .attr("width", 13)
+            .attr("height", 13)
+            .attr("rx", 2)
+            .attr("x", margin.left / 2)
+            .attr("y", 30);
+
+        legend.append("text")
+            .text("Under or equal to 100 daily visitors")
+            .attr("x", margin.left / 2 + 20)
+            .attr("y", 40);
+        
+        const xLabel = barChart.append("text");
+
+        xLabel.append("tspan")
+            .text("X Axis")
+            .attr("class", "xAxis")
+            .attr("text-anchor", "middle")
+            .attr("x", -width)
+            .attr("y", -height);
+        
+        xLabel.append("tspan")
+            .text("Days of the week (11/05 to 17/05)")
+            .attr("class", "xAxis")
+            .attr("text-anchor", "middle")
+            .attr("x", (width + margin.left + margin.right) / 2)
+            .attr("y", height + margin.top + margin.bottom / 1.5);
+        
+        const xTicks = barChart.append("g") 
+            .attr("aria-label", "Range of the X-axis");
+        
+        xTicks.selectAll(".xTicks")
+            .data(data)
+            .enter().append("text")
+            .text((data) => data.day)
+            .attr("class", "xTicks")
+            .attr("x", function(row, index) { return x(index + 1) + 5; })
+            .attr("y", height + margin.top)
+            .attr("width", 30)
+            .attr("text-anchor", "middle");
+        
+        const yLabel = barChart.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("class", "yAxis");
+        
+        yLabel.append("tspan")
+            .text("Y Axis")
+            .attr("x", -width)
+            .attr("y", -height);
+
+        yLabel.append("tspan")
+            .text("Amount of unique visitors")
+            .attr("text-anchor", "middle")
+            .attr("x", -height / 2 - margin.top)
+            .attr("y", margin.left / 2 + 5);
+        
+        const yRange = [];
+
+        const topYValue = Math.ceil(maxYValue/100)*100;
+        for(var i=0; i <= (topYValue / 100); i++) {
+            yRange.push(i * 100);
+        }
+
+        const yTicks = barChart.append("g")
+            .attr("class", "yTicks")
+            .attr("aria-label", "Range of the Y-axis");
+        
+        yTicks.selectAll(".tick")
+            .data(yRange)
+            .enter()
+            .append("text")
+                .text(row => row)
+                .attr("x", row => row >= 100 ? margin.left - 5 : margin.left + 5)
+                .attr("y", row => y(row) + margin.top - 13)
+                .attr("opacity", 0.75)
+                .attr("width", 30);
+        
+        yTicks.selectAll(".line")
+            .data(yRange)
+            .enter()
+            .append("line")
+                .attr("x1", margin.left + 20)
+                .attr("x2", width + margin.left)
+                .attr("y1", row => y(row) + margin.top - 15)
+                .attr("y2", row => y(row) + margin.top - 15)
+                .attr("stroke", "#49456C")
+                .attr("stroke-width", 1)
+                .attr("opacity", 0.15);
+        
+        barChart.selectAll('.bar')
+            .data(data)
+            .enter().append("rect")
+            .attr("class", row => row.visitors > 100 ? "bar" : "bar danger")
+            .attr("x", (row, index) => x(index +1))
+            .attr("y", row => y(row.visitors) + margin.top - 15)
+            .attr("width", 10)
+            .transition()
+            .ease(d3.easeLinear)
+            .duration(2000)
+            .attr("height", row => height - y(row.visitors))
+            .attr("rx", 5);
+
+        
+        const barLabels = barChart.selectAll(".label")
+            .data(data)
+            .enter().append("text").attr("class", "label");
+        
+        barLabels.append("tspan")
+            .text(row => row.day)
+            .attr("text-anchor", "middle")
+            .attr("x", -width)
+            .attr("y", -height);
+
+        barLabels.append("tspan")
+            .text(row => row.visitors)
+            .attr("text-anchor", "middle")
+            .attr("x", (row, index) => x(index + 1) + 5)
+            .attr("y", row => y(row.visitors) + margin.top - 20);
+    </script>
+</body>
+</html>
